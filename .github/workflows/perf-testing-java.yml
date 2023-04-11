@@ -1,0 +1,39 @@
+name: Benchmark Performance Testing
+
+# on:
+  # push:
+  #   branches: [ 'main' ]
+
+jobs:
+  benchmark:
+    name: Check performance regeression.
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Setup JDK
+        uses: actions/setup-java@v1
+        with:
+          distribution: 'adopt'
+          java-version: '17'
+      
+      - name: Run benchmark
+        run: |
+          cd java
+          mvn clean verify
+          java -jar target/benchmarks.jar -wi 1 -i 3 -f 1 -rf json
+      
+      - name: Store benchmark result
+        uses: rhysd/github-action-benchmark@v1
+        with:
+          name: JMH Benchmark
+          tool: 'jmh'
+          output-file-path: results/jmh-result.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
+          alert-threshold: '130%'
+          comment-on-alert: true
+          fail-on-alert: true
+          #alert-comment-cc-users: '@thomaspoignant'

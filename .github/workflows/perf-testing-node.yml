@@ -6,29 +6,24 @@ on:
 
 jobs:
   benchmark:
-    name: Check performance regeression.
+    name: Check performance regeression for Node App.
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       
-      - name: Setup JDK
-        uses: actions/setup-java@v1
-        with:
-          distribution: 'adopt'
-          java-version: '17'
+      - name: Setup Node
+        uses: actions/setup-node@v1
       
       - name: Run benchmark
-        run: |
-          mvn clean verify
-          java -jar target/benchmarks.jar -wi 1 -i 3 -f 1 -rf json
+        run: cd node && npm install && node bench.js | tee output.txt
       
       - name: Store benchmark result
         uses: rhysd/github-action-benchmark@v1
         with:
-          name: JMH Benchmark
-          tool: 'jmh'
+          name: Benchmark.js Benchmark
+          tool: 'benchmarkjs'
           output-file-path: results/jmh-result.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: true
